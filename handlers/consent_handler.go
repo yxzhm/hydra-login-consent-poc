@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 )
 
 func ConsentHandler(ctx *gin.Context) {
@@ -10,6 +11,10 @@ func ConsentHandler(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
+	oemCode := GetChallengeAndOEMCode(consentRequest.LoginChallenge)
+	//Get OEM authorization code here, shall get the OEM token here or somewhere else
+	//
+	log.Printf(oemCode)
 
 	//ignore consent page here, accept directly.
 	acceptConsentRequest := AcceptConsentRequest{

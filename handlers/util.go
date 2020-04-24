@@ -6,13 +6,21 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/render"
+	"github.com/patrickmn/go-cache"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 var HydraAdmin = ""
+var OemClientID = ""
+var memCache *cache.Cache
+
+func init() {
+	memCache = cache.New(60*time.Minute, 60*time.Minute)
+}
 
 func GetInfoFromHydraAdmin(ctx *gin.Context, flow string, result interface{}) (string, error) {
 	challenge := ctx.Request.URL.Query().Get(fmt.Sprintf("%s_challenge", flow))
@@ -38,6 +46,7 @@ func GetInfoFromHydraAdmin(ctx *gin.Context, flow string, result interface{}) (s
 
 func AcceptChallenge(ctx *gin.Context, flow string, challenge string, acceptRequest interface{}) error {
 	acceptUrl := fmt.Sprintf("%s/oauth2/auth/requests/%s/accept?challenge=%s", HydraAdmin, flow, challenge)
+
 	acceptRequestBody, err := json.Marshal(acceptRequest)
 	if err != nil {
 		return err
@@ -75,4 +84,15 @@ func GetEnvStrValue(key string, defaultValue string) string {
 		log.Printf(fmt.Sprintf("Get ENV [%s] -> [%s]", key, envValue))
 		return envValue
 	}
+}
+
+func SetChallengeAndOEMCode(challenge string, code string) {
+	memCache.Set(challenge, code, cache.DefaultExpiration)
+}
+
+func GetChallengeAndOEMCode(challenge string) string {
+	if x, found := memCache.Get(challenge); found {
+		return x.(string)
+	}
+	return ""
 }

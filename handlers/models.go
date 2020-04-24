@@ -1,7 +1,12 @@
 package handlers
 
 type AcceptLoginRequest struct {
-	Subject string `json:"subject"`
+	Subject string  `json:"subject"`
+	Context OEMCode `json:"context"`
+}
+
+type OEMCode struct {
+	Code string `json:"code"`
 }
 
 type CompletedRequest struct {
@@ -11,6 +16,7 @@ type CompletedRequest struct {
 type ConsentRequest struct {
 	RequestedScope               []string `json:"requested_scope"`
 	RequestedAccessTokenAudience []string `json:"requested_access_token_audience"`
+	LoginChallenge               string   `json:"login_challenge"`
 }
 
 type AcceptConsentRequest struct {
